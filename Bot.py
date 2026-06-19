@@ -492,8 +492,11 @@ def _save_intake(intake: Dict[str, Any]) -> Optional[Path]:
 # Command Handlers
 # ───────────────────────────────────────────────
 
-async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Initiates the intake conversation."""
+async def cmd_start(update, context):
+    """Initiates the intake conversation — full implementation in main.py."""
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from datetime import datetime, timezone
+
     user = update.effective_user
     logger.info("New intake started by user %d (%s)", user.id, user.username or "N/A")
 
@@ -522,4 +525,16 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             InlineKeyboardButton("Property", callback_data="Property"),
         ],
         [
-            InlineKeyboardButton("Corporate", callback_data="C
+            InlineKeyboardButton("Corporate", callback_data="Corporate"),
+            InlineKeyboardButton("Immigration", callback_data="Immigration"),
+        ],
+        [
+            InlineKeyboardButton("Employment", callback_data="Employment"),
+            InlineKeyboardButton("Other", callback_data="Other"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    text = await _generate_intake_message(STATE_ISSUE_TYPE, context)
+    await _ask_user(update, context, text, reply_markup=reply_markup)
+    return STATE_ISSUE_TYPE
